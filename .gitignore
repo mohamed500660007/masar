@@ -1,0 +1,24 @@
+# Laravel project ignores (nested)
+masar/.env
+masar/.env.backup
+masar/.env.production
+masar/vendor/
+masar/node_modules/
+masar/public/build/
+masar/public/hot
+masar/public/storage
+masar/storage/*.key
+masar/storage/pail/
+masar/.phpunit.cache/
+masar/auth.json
+
+# Frontend build artifacts
+masar/front-end/node_modules/
+masar/front-end/dist/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
