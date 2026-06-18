@@ -1,0 +1,440 @@
+---
+title: Interactive Guide to OS Processes
+description: Learn about OS processes, memory layouts, life cycles, and context switching through interactive diagrams and simulations.
+---
+
+import { useState } from 'react'
+
+# Interactive Guide to OS Processes
+
+In an Operating System, a **process** is a program in execution. While a program is a passive entity (like a file on disk), a process is an active entity with a program counter, registers, memory allocations, and system resources.
+
+---
+
+## 1. Anatomy of a Process Memory
+
+When a program is loaded into memory, the Operating System structures it into distinct sections. 
+
+Click on each section of the memory visualizer below to explore its runtime purpose:
+
+export const MemoryVisualizer = () => {
+  const [activeSection, setActiveSection] = useState('text');
+  const sections = {
+    stack: {
+      name: "Stack Section",
+      details: "Contains temporary data such as function parameters, return addresses, and local variables. It grows downward toward the heap as nested functions are called.",
+      color: "#EC4899"
+    },
+    heap: {
+      name: "Heap Section",
+      details: "Dynamically allocated memory requested during program execution (e.g., using `malloc` in C/C++ or `new` in Java/JavaScript). It grows upward toward the stack.",
+      color: "#10B981"
+    },
+    data: {
+      name: "Data Section",
+      details: "Contains global variables and static variables that were initialized by the programmer before execution started.",
+      color: "#F59E0B"
+    },
+    text: {
+      name: "Text Section",
+      details: "The compiled binary instructions (machine code) read directly from disk. It is read-only to prevent a process from accidentally modifying its own code.",
+      color: "#6366F1"
+    }
+  };
+  return (
+    <div style={{
+      border: '1px solid #1E293B',
+      background: '#0F172A',
+      padding: '1.5rem',
+      borderRadius: '12px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '1.25rem',
+      marginTop: '1.5rem',
+      marginBottom: '1.5rem'
+    }}>
+      <h4 style={{ color: '#F8FAFC', margin: 0, fontSize: '0.95rem', fontWeight: 600 }}>Memory Layout Simulator</h4>
+      <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          width: '180px',
+          background: '#020617',
+          padding: '8px',
+          borderRadius: '8px',
+          border: '1px solid #334155'
+        }}>
+          {Object.keys(sections).map(s => (
+            <button 
+              key={s} 
+              onClick={() => setActiveSection(s)}
+              style={{
+                padding: '12px',
+                margin: '4px 0',
+                textTransform: 'uppercase',
+                fontWeight: 700,
+                fontSize: '0.8rem',
+                letterSpacing: '0.5px',
+                background: activeSection === s ? sections[s].color : '#1E293B',
+                color: activeSection === s ? '#020617' : '#94A3B8',
+                border: 'none',
+                cursor: 'pointer',
+                borderRadius: '6px',
+                transition: 'all 0.2s ease',
+                textAlign: 'center'
+              }}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+        <div style={{
+          flex: 1,
+          padding: '1.25rem',
+          background: '#1E293B',
+          borderRadius: '8px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          borderLeft: `5px solid ${sections[activeSection].color}`
+        }}>
+          <h5 style={{ color: '#F8FAFC', margin: '0 0 8px 0', fontSize: '1rem', fontWeight: 700 }}>
+            {sections[activeSection].name}
+          </h5>
+          <p style={{ margin: 0, fontSize: '0.9rem', color: '#CBD5E1', lineHeight: 1.5 }}>
+            {sections[activeSection].details}
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+<MemoryVisualizer />
+
+---
+
+## 2. Interactive Process Life Cycle
+
+As a process executes, it moves through different states. The CPU scheduler transitions processes between these states to optimize CPU utilization.
+
+Step through the process simulation below to run a task state machine:
+
+export const ProcessSimulator = () => {
+  const [state, setState] = useState('NEW');
+  const [log, setLog] = useState('Process is being initialized in storage.');
+  const [history, setHistory] = useState(['NEW']);
+  const transition = (newState, reason) => {
+    setState(newState);
+    setLog(reason);
+    setHistory(prev => [...prev, newState]);
+  };
+  const reset = () => {
+    setState('NEW');
+    setLog('Simulation restarted. Process created.');
+    setHistory(['NEW']);
+  };
+  const btnStyle = {
+    padding: '8px 14px',
+    background: '#6366F1',
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    fontWeight: 600,
+    fontSize: '0.85rem',
+    transition: 'background 0.2s',
+  };
+  return (
+    <div style={{
+      border: '1px solid #1E293B',
+      background: '#0F172A',
+      padding: '1.5rem',
+      borderRadius: '12px',
+      marginTop: '1.5rem',
+      marginBottom: '1.5rem'
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+        <h4 style={{ color: '#F8FAFC', margin: 0, fontSize: '0.95rem' }}>Lifecycle State Machine</h4>
+        <span style={{
+          background: state === 'RUNNING' ? '#10B981' : state === 'WAITING' ? '#F59E0B' : state === 'READY' ? '#6366F1' : '#64748B',
+          color: '#020617',
+          padding: '4px 12px',
+          borderRadius: '9999px',
+          fontWeight: 800,
+          fontSize: '0.75rem',
+          letterSpacing: '1px'
+        }}>{state}</span>
+      </div>
+      <div style={{
+        background: '#020617',
+        padding: '12px',
+        borderRadius: '6px',
+        border: '1px solid #1E293B',
+        fontSize: '0.85rem',
+        color: '#E2E8F0',
+        marginBottom: '1.25rem',
+        fontFamily: 'monospace'
+      }}>
+        ℹ️ {log}
+      </div>
+      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
+        {state === 'NEW' && (
+          <button onClick={() => transition('READY', 'Admitted to the primary ready queue in RAM.')} style={btnStyle}>Admit to Ready</button>
+        )}
+        {state === 'READY' && (
+          <button onClick={() => transition('RUNNING', 'CPU Scheduler Dispatch: allocated core execution time.')} style={btnStyle}>Dispatch to CPU</button>
+        )}
+        {state === 'RUNNING' && (
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <button onClick={() => transition('READY', 'Interrupt: Timer slice expired (Preemption).')} style={{ ...btnStyle, background: '#EF4444' }}>Interrupt (Timeout)</button>
+            <button onClick={() => transition('WAITING', 'I/O Request: blocked waiting for disk/network resource.')} style={{ ...btnStyle, background: '#F59E0B' }}>Request I/O</button>
+            <button onClick={() => transition('TERMINATED', 'Exit: task execution finished successfully.')} style={{ ...btnStyle, background: '#10B981' }}>Finish / Exit</button>
+          </div>
+        )}
+        {state === 'WAITING' && (
+          <button onClick={() => transition('READY', 'I/O Event Completed: moved back to the ready queue.')} style={btnStyle}>I/O Completed</button>
+        )}
+        {state === 'TERMINATED' && (
+          <button onClick={reset} style={{ ...btnStyle, background: '#475569' }}>Restart Simulator</button>
+        )}
+      </div>
+      <div style={{ fontSize: '0.8rem', color: '#64748B' }}>
+        <strong>State History Trace: </strong>
+        {history.join(' ➔ ')}
+      </div>
+    </div>
+  )
+}
+
+<ProcessSimulator />
+
+---
+
+## 3. The Process Control Block (PCB)
+
+For each process, the Operating System maintains a **Process Control Block (PCB)**. Think of this as the process's ID card or snapshot.
+
+Use the interactive inspector below to view what the OS tracks inside a PCB:
+
+export const PcbInspector = () => {
+  const [selectedField, setSelectedField] = useState('pid');
+  const fields = {
+    pid: {
+      label: "Process ID (PID)",
+      val: "PID: 4829",
+      desc: "A unique numeric identifier assigned by the OS when the process is spawned."
+    },
+    pc: {
+      label: "Program Counter (PC)",
+      val: "PC: 0x00FF8C12",
+      desc: "Holds the memory address of the next instruction code block this process will execute."
+    },
+    registers: {
+      label: "CPU Registers",
+      val: "EAX: 0x5, EBX: 0x1F",
+      desc: "Storage locations in CPU cores. When scheduled out, register values must be saved to restore later."
+    },
+    limits: {
+      label: "Memory Limits",
+      val: "Base: 0x10000, Limit: 0x24000",
+      desc: "Boundary registers defining the allocated physical memory range to prevent crashing other applications."
+    }
+  };
+  return (
+    <div style={{
+      border: '1px solid #1E293B',
+      background: '#0F172A',
+      padding: '1.5rem',
+      borderRadius: '12px',
+      marginTop: '1.5rem',
+      marginBottom: '1.5rem'
+    }}>
+      <h4 style={{ color: '#F8FAFC', margin: '0 0 1rem 0', fontSize: '0.95rem' }}>PCB Memory Inspector</h4>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {Object.keys(fields).map(f => (
+            <div 
+              key={f}
+              onClick={() => setSelectedField(f)}
+              style={{
+                padding: '10px',
+                background: selectedField === f ? '#1E293B' : '#020617',
+                border: selectedField === f ? '1px solid #6366F1' : '1px solid #334155',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '0.85rem',
+                color: selectedField === f ? '#F8FAFC' : '#94A3B8',
+                fontWeight: 600,
+                display: 'flex',
+                justifyContent: 'space-between',
+                transition: 'all 0.2s'
+              }}
+            >
+              <span>{fields[f].label}</span>
+              <span style={{ fontFamily: 'monospace', color: '#10B981', fontSize: '0.8rem' }}>{fields[f].val}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{
+          background: '#020617',
+          padding: '1rem',
+          borderRadius: '6px',
+          border: '1px solid #1E293B',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center'
+        }}>
+          <h5 style={{ color: '#6366F1', margin: '0 0 6px 0', fontSize: '0.9rem', fontWeight: 700 }}>
+            {fields[selectedField].label} Details
+          </h5>
+          <p style={{ margin: 0, fontSize: '0.85rem', color: '#94A3B8', lineHeight: 1.4 }}>
+            {fields[selectedField].desc}
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+<PcbInspector />
+
+
+## 4. Context Switching
+
+When the CPU scheduler suspends execution of **Process A** and starts executing **Process B**, it triggers a **Context Switch**.
+
+Click the simulator below to step through how the CPU transfers states:
+
+export const ContextSwitcher = () => {
+  const [step, setStep] = useState(0);
+  const steps = [
+    {
+      action: "Process A is executing on the CPU core.",
+      pcbA: "State: Running | PC: 0x04 | Registers: Active",
+      pcbB: "State: Ready | PC: 0xA0 | Registers: Saved",
+      cpu: "Executing Process A"
+    },
+    {
+      action: "Interrupt occurs. CPU suspends Process A and saves its register values to PCB A.",
+      pcbA: "State: Ready | PC: 0x05 | Registers: SAVED ✅",
+      pcbB: "State: Ready | PC: 0xA0 | Registers: Saved",
+      cpu: "Idle (Saving State A...)"
+    },
+    {
+      action: "CPU loads the execution context (PC, register values) from PCB B.",
+      pcbA: "State: Ready | PC: 0x05 | Registers: Saved",
+      pcbB: "State: Running | PC: 0xA0 | Registers: LOADED 🔄",
+      cpu: "Idle (Loading State B...)"
+    },
+    {
+      action: "Process B starts execution on the CPU core. Context switch complete.",
+      pcbA: "State: Ready | PC: 0x05 | Registers: Saved",
+      pcbB: "State: Running | PC: 0xA1 | Registers: Active",
+      cpu: "Executing Process B"
+    }
+  ];
+  return (
+    <div style={{
+      border: '1px solid #1E293B',
+      background: '#0F172A',
+      padding: '1.5rem',
+      borderRadius: '12px',
+      marginTop: '1.5rem',
+      marginBottom: '1.5rem'
+    }}>
+      <h4 style={{ color: '#F8FAFC', margin: '0 0 1rem 0', fontSize: '0.95rem' }}>Context Switch Walkthrough</h4>
+      <div style={{
+        background: '#020617',
+        padding: '12px',
+        borderRadius: '6px',
+        fontSize: '0.85rem',
+        color: '#E2E8F0',
+        marginBottom: '1rem',
+        borderLeft: '4px solid #6366F1'
+      }}>
+        <strong>Step {step + 1}:</strong> {steps[step].action}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '1.25rem' }}>
+        <div style={{ background: '#1E293B', padding: '10px', borderRadius: '6px', fontSize: '0.8rem' }}>
+          <strong style={{ color: '#EC4899', display: 'block', marginBottom: '4px' }}>PCB A</strong>
+          <span style={{ color: '#CBD5E1', fontFamily: 'monospace' }}>{steps[step].pcbA}</span>
+        </div>
+        <div style={{
+          background: '#020617',
+          padding: '10px',
+          borderRadius: '6px',
+          fontSize: '0.8rem',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          border: '1px dashed #334155'
+        }}>
+          <strong style={{ color: '#6366F1', display: 'block', marginBottom: '4px' }}>CPU</strong>
+          <span style={{ color: '#F8FAFC', fontWeight: 'bold' }}>{steps[step].cpu}</span>
+        </div>
+        <div style={{ background: '#1E293B', padding: '10px', borderRadius: '6px', fontSize: '0.8rem' }}>
+          <strong style={{ color: '#10B981', display: 'block', marginBottom: '4px' }}>PCB B</strong>
+          <span style={{ color: '#CBD5E1', fontFamily: 'monospace' }}>{steps[step].pcbB}</span>
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <button 
+          onClick={() => setStep(prev => Math.max(0, prev - 1))}
+          disabled={step === 0}
+          style={{
+            padding: '6px 12px',
+            background: step === 0 ? '#475569' : '#1E293B',
+            color: '#F8FAFC',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: step === 0 ? 'not-allowed' : 'pointer',
+            fontSize: '0.8rem',
+            fontWeight: 600
+          }}
+        >
+          Previous Step
+        </button>
+        <button 
+          onClick={() => setStep(prev => Math.min(steps.length - 1, prev + 1))}
+          disabled={step === steps.length - 1}
+          style={{
+            padding: '6px 12px',
+            background: step === steps.length - 1 ? '#475569' : '#6366F1',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: step === steps.length - 1 ? 'not-allowed' : 'pointer',
+            fontSize: '0.8rem',
+            fontWeight: 600
+          }}
+        >
+          Next Step
+        </button>
+        {step === steps.length - 1 && (
+          <button 
+            onClick={() => setStep(0)}
+            style={{
+              padding: '6px 12px',
+              background: '#475569',
+              color: '#F8FAFC',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '0.8rem',
+              fontWeight: 600
+            }}
+          >
+            Reset
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+<ContextSwitcher />
+
+> [!NOTE]
+> **Performance Overhead:** Context switching is pure overhead. The system does no useful computation while saving and restoring registers and memory contexts, meaning highly frequent switching (thrashing) degrades performance.

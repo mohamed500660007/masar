@@ -1,0 +1,14 @@
+1. convert front end to baldes files
+2. remove Featured Articles section 
+2. remove Featured Articles section ,Engineering Challenges ,Why This Site
+3. add newletter section 
+4. keep design and font and every thing 
+5. creat course page when use click course open left sidebar and main content 
+6. left sidebar contain topic and subtopic 
+7. when user click subtopic open main content 
+8. in main content show conten of lesson
+9. left side of page  contain table of content of lesson  
+
+
+
+ 
